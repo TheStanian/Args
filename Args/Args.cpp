@@ -5,7 +5,7 @@
 
 ArgsHandler::ArgsHandler(int argc, char * argv []) {
 	std::string lastFlag = "";
-	execPath = std::string(argv[0]);
+	execpath = std::string(argv[0]);
 	for (int i = 1; i < argc; ++i) {
 		std::string current(argv[i]);
 		if (current.at(0) == '-') {
@@ -26,6 +26,17 @@ ArgsHandler::ArgsHandler(int argc, char * argv []) {
 			}
 		}
 	}
+}
+
+ArgsHandler::ArgsHandler() {
+	execpath = "";
+}
+
+ArgsHandler::ArgsHandler(const ArgsHandler &args) {
+	arguments = args.arguments;
+	flags = args.flags;
+	startargs = args.startargs;
+	execpath = args.execpath;
 }
 
 bool ArgsHandler::hasFlag(std::string flag) const {
@@ -86,7 +97,7 @@ bool ArgsHandler::getFlagValueBool(std::string flag, bool dflt) const {
 }
 
 std::string ArgsHandler::getExecutionPath() const {
-	return execPath;
+	return execpath;
 }
 
 std::vector<std::string> ArgsHandler::getFlagArguments(std::string flag) const {
@@ -137,6 +148,12 @@ Flag::Flag(std::string input) {
 Flag::Flag() {
 	name = "";
 	value = "";
+}
+
+Flag::Flag(const Flag &flag) {
+	name = flag.name;
+	value = flag.value;
+	arguments = flag.arguments;
 }
 
 void Flag::addArgument(int argNumber) {

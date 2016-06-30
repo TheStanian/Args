@@ -18,6 +18,7 @@ struct Flag {
 	std::vector<int> arguments;
 
 	Flag();
+	Flag(const Flag &flag);
 	Flag(std::string input);
 	void addArgument(int argNumber);
 };
@@ -28,10 +29,16 @@ private:
 	std::vector<std::string> arguments;
 	std::map<std::string, Flag> flags;
 	std::vector<int> startargs;
-	std::string execPath;
+	std::string execpath;
 public:
 	/* Constructor, just pass the main function's argument data. */
 	ArgsHandler(int argc, char * argv []);
+
+	/* Copy ctor, default would've worked.. */
+	ArgsHandler(const ArgsHandler& args);
+
+	/* Default ctor */
+	ArgsHandler();
 
 	/* Check whether a given flag was used.*/
 	bool hasFlag(std::string flag) const;
