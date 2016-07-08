@@ -3,7 +3,7 @@
 #include <iostream>
 #include "Args.h"
 
-ArgsHandler::ArgsHandler(int argc, char * argv []) {
+ArgsHandler::ArgsHandler(int argc, char * argv [], bool checkCheckedFlags) : checkCheckedFlags(checkCheckedFlags) {
 	std::string lastFlag = "";
 	execpath = std::string(argv[0]);
 	for (int i = 1; i < argc; ++i) {
@@ -39,11 +39,12 @@ ArgsHandler::ArgsHandler(const ArgsHandler &args) {
 	execpath = args.execpath;
 }
 
-bool ArgsHandler::hasFlag(std::string flag) const {
+bool ArgsHandler::hasFlag(std::string flag) {
+	if (checkCheckedFlags) {checkedFlags.insert(flag);}
 	return (flags.find(flag) != flags.end());
 }
 
-std::string ArgsHandler::getFlagValueString(std::string flag, std::string dflt) const {
+std::string ArgsHandler::getFlagValueString(std::string flag, std::string dflt) {
 	if (hasFlag(flag)) {
 		return flags.find(flag)->second.value;
 	} else {
@@ -51,7 +52,7 @@ std::string ArgsHandler::getFlagValueString(std::string flag, std::string dflt) 
 	}
 }
 
-int ArgsHandler::getFlagValueInt(std::string flag, int dflt) const {
+int ArgsHandler::getFlagValueInt(std::string flag, int dflt) {
 	if (hasFlag(flag)) {
 		std::string flgstr = flags.find(flag)->second.value;
 		int ret = dflt;
@@ -66,7 +67,7 @@ int ArgsHandler::getFlagValueInt(std::string flag, int dflt) const {
 	}
 }
 
-double ArgsHandler::getFlagValueDouble(std::string flag, double dflt) const {
+double ArgsHandler::getFlagValueDouble(std::string flag, double dflt) {
 	if (hasFlag(flag)) {
 		std::string flgstr = flags.find(flag)->second.value;
 		double ret = dflt;
@@ -81,7 +82,7 @@ double ArgsHandler::getFlagValueDouble(std::string flag, double dflt) const {
 	}
 }
 
-bool ArgsHandler::getFlagValueBool(std::string flag, bool dflt) const {
+bool ArgsHandler::getFlagValueBool(std::string flag, bool dflt) {
 	if (hasFlag(flag)) {
 			std::string flgstr = flags.find(flag)->second.value;
 			bool ret = dflt;
@@ -100,7 +101,7 @@ std::string ArgsHandler::getExecutionPath() const {
 	return execpath;
 }
 
-std::vector<std::string> ArgsHandler::getFlagArguments(std::string flag) const {
+std::vector<std::string> ArgsHandler::getFlagArguments(std::string flag) {
 	std::vector<std::string> flagArguments;
 	if (!hasFlag(flag)) {
 		return flagArguments;
@@ -160,7 +161,18 @@ void Flag::addArgument(int argNumber) {
 	arguments.push_back(argNumber);
 }
 
-std::ostream& operator<<(std::ostream& os, const ArgsHandler &args) {
+std::set<std::string> ArgsHandler::getCheckedFlags() const {
+	return checkedFlags;
+}
+
+void ArgsHandler::printCheckedFlags() {
+	std::cout << "Currently checked-for flags:" << std::endl;
+	for (std::string flag:getCheckedFlags()) {
+		std::cout << "\t" << flag << std::endl;
+	}
+}
+
+std::ostream& operator<<(std::ostream& os, ArgsHandler &args) {
 	os << "-----------------------------" << std::endl
 			<< "This program was run as:" << std::endl << "    " << args.getExecutionPath() << std::endl
 			<< "with the following flags and arguments:" << std::endl;
@@ -172,19 +184,23 @@ std::ostream& operator<<(std::ostream& os, const ArgsHandler &args) {
 	}
 	for (std::string flag:args.getFlags()) {
 		os << "    flag \"" << flag << "\"";
-		std::string flval = args.getFlagValueString(flag);
+		std::string flval = args.flags.find(flag)->second.value;
 		if (flval != "") {
 			os << " with value \"" << flval << "\"";
 		}
 
-		std::vector<std::string> flargs = args.getFlagArguments(flag);
+		std::vector<std::string> flargs;
+		for (int arg:(args.flags.find(flag)->second.arguments)) {
+			flargs.push_back(args.arguments[arg]);
+		}
+
 		if (flargs.size() > 0) {
 			os << ":";
 		}
 
 		os << std::endl;
 
-		for (std::string arg:args.getFlagArguments(flag)) {
+		for (std::string arg:flargs) {
 			os << "        " << arg << std::endl;
 		}
 	}

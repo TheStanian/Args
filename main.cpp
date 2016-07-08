@@ -9,7 +9,7 @@
 
 int main(int argc, char *argv[]) {
 	/* It's as simple as creating an instance of ArgsHandler! */
-	ArgsHandler args(argc, argv);
+	ArgsHandler args(argc, argv, true);
 
 	/* Printing all args could be useful for debugging purposes. */
 	std::cout << args << std::endl;
@@ -41,6 +41,11 @@ int main(int argc, char *argv[]) {
 		std::cout << s << "; ";
 	}
 	std::cout << std::endl;
+
+	/* In some cases it can be useful to check which flags you've checked for so far.
+	 * You can get them as a std::set<std::string> or printed to cout.
+	 */
+	args.printCheckedFlags();
 
 	return 0;
 }
